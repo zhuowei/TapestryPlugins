@@ -18,6 +18,17 @@
       "prompt": "Two-factor code (if any)",
       "placeholder": "123456",
       "value": "(none)"
+    },
+    {
+      "name": "includeFeed",
+      "type": "switch",
+      "prompt": "Include For You feed",
+      "value": "on"
+    },
+    {
+      "name": "includeMentions",
+      "type": "switch",
+      "prompt": "Include Mentions"
     }
   ]
 }

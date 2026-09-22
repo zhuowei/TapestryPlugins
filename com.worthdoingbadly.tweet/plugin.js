@@ -54,15 +54,19 @@ async function doLogin() {
     ).json();
     loginResponse = response2;
   }
+  setItem("email", loginResponse.email);
   setItem("idToken", loginResponse.idToken);
   setItem("refreshToken", loginResponse.refreshToken);
   setItem("expiryDate", Date.now() + Number(loginResponse.expires_in) * 1000);
+  setItem("username", loginResponse.localId);
   return loginResponse;
 }
 
 async function verify() {
-  const loginResponse = await doLogin();
-  const username = loginResponse.localId;
+  if (accountEmail !== getItem("email") || !getItem("refreshToken")) {
+    await doLogin();
+  }
+  const username = getItem("username");
   return {
     identity: {
       name: username,
@@ -104,13 +108,43 @@ async function getAuthToken() {
 
 async function load() {
   const authHeader = await getAuthToken();
-  // For You
-  const response = await fetch(API_BASE + "/api/posts", {
-    headers: {
-      authorization: authHeader,
-    },
-  }).json();
-  return response.posts.map((p) => ({
+
+  const tasks = [];
+
+  if (includeFeed == "on") {
+    tasks.push(
+      (async () => {
+        const response = await fetch(API_BASE + "/api/posts", {
+          headers: {
+            authorization: authHeader,
+          },
+        }).json();
+        processResults(response.posts.map(tweetAppPostToTapestry));
+      })(),
+    );
+  }
+
+  if (includeMentions == "on") {
+    tasks.push(
+      (async () => {
+        const response = await fetch(API_BASE + "/api/notifications", {
+          headers: {
+            authorization: authHeader,
+          },
+        }).json();
+        processResults(
+          response.notifications
+            .filter((p) => p.type === "mention")
+            .map(tweetAppNotificationToTapestry),
+        );
+      })(),
+    );
+  }
+  await Promise.all(tasks);
+}
+
+function tweetAppPostToTapestry(p) {
+  return {
     uri: `${SITE_BASE}/post/${p.id}`,
     date: new Date(p.createdAt),
     body: p.text.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
@@ -120,5 +154,19 @@ async function load() {
       uri: `${SITE_BASE}/user/${p.authorUsername}`,
       avatar: p.authorAvatar,
     },
-  }));
+  };
+}
+
+function tweetAppNotificationToTapestry(p) {
+  return {
+    uri: `${SITE_BASE}/post/${p.postId}`,
+    date: new Date(p.createdAt),
+    body: p.preview.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
+    author: {
+      name: p.actorDisplayName,
+      username: `@${p.actorHandle}`,
+      uri: `${SITE_BASE}/user/${p.actorHandle}`,
+      avatar: p.actorAvatarUrl,
+    },
+  };
 }
