@@ -1,0 +1,14 @@
+{
+  "id": "com.worthdoingbadly.tweet",
+  "display_name": "Tweet.app - timeline",
+  "service_name": "Tweet.app",
+  "icon": "https://app.tweet.app/apple-touch-icon.png",
+  "default_color": "blue",
+  "site": "https://app.tweet.app",
+  "item_style": "post",
+  "needs_verification": true,
+  "verify_variables": true,
+  "provides_attachments": true,
+  "minimum_app_version": "2.0",
+  "version": 1
+}

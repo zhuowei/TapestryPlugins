@@ -1,0 +1,16 @@
+{
+  "inputs": [
+    {
+      "name": "accountEmail",
+      "type": "text",
+      "prompt": "Email",
+      "placeholder": "hello@example.com"
+    },
+    {
+      "name": "accountPassword",
+      "type": "text",
+      "prompt": "Password",
+      "placeholder": "WARNING: stored in plaintext!"
+    }
+  ]
+}
