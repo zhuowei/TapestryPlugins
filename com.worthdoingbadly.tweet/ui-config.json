@@ -11,6 +11,13 @@
       "type": "text",
       "prompt": "Password",
       "placeholder": "(Only stored locally.)"
+    },
+    {
+      "name": "accountTwoFactor",
+      "type": "text",
+      "prompt": "Two-factor code (if any)",
+      "placeholder": "123456",
+      "value": "(none)"
     }
   ]
 }

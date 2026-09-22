@@ -12,7 +12,7 @@ const API_BASE = "https://api.tweet.app";
 const SITE_BASE = "https://app.tweet.app";
 
 async function doLogin() {
-  const loginResponse = await fetch(
+  let loginResponse = await fetch(
     "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword",
     {
       method: "POST",
@@ -29,6 +29,31 @@ async function doLogin() {
       },
     },
   ).json();
+  if (loginResponse.mfaPendingCredential) {
+    if (!accountTwoFactor) {
+      throw new Error("You have two-factor turned on - enter the code");
+    }
+    response2 = await fetch(
+      "https://identitytoolkit.googleapis.com/v2/accounts/mfaSignIn:finalize",
+      {
+        method: "POST",
+        headers: {
+          referer: SITE_BASE,
+        },
+        params: {
+          key: firebaseConfig.apiKey,
+        },
+        json: {
+          mfaPendingCredential: loginResponse.mfaPendingCredential,
+          mfaEnrollmentId: loginResponse.mfaInfo[0].mfaEnrollmentId,
+          totpVerificationInfo: {
+            verificationCode: accountTwoFactor,
+          },
+        },
+      },
+    ).json();
+    loginResponse = response2;
+  }
   setItem("idToken", loginResponse.idToken);
   setItem("refreshToken", loginResponse.refreshToken);
   setItem("expiryDate", Date.now() + Number(loginResponse.expires_in) * 1000);
@@ -36,7 +61,7 @@ async function doLogin() {
 }
 
 async function verify() {
-  const loginResponse = doLogin();
+  const loginResponse = await doLogin();
   const username = loginResponse.localId;
   return {
     identity: {
