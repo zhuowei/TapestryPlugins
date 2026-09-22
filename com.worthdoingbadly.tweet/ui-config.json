@@ -10,7 +10,7 @@
       "name": "accountPassword",
       "type": "text",
       "prompt": "Password",
-      "placeholder": "WARNING: stored in plaintext!"
+      "placeholder": "(Only stored locally.)"
     }
   ]
 }

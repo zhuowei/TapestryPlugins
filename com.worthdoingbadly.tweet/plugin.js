@@ -36,7 +36,7 @@ async function doLogin() {
 }
 
 async function verify() {
-  const loginResponse = doLoginResponse();
+  const loginResponse = doLogin();
   const username = loginResponse.localId;
   return {
     identity: {
